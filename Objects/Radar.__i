@@ -1,0 +1,1 @@
+"User\Radar.c" LARGE OMF2 OPTIMIZE (0,SPEED) BROWSE INCDIR(.\H;.\User;.\TKDriver\C) DEBUG PRINT(.\Listings\Radar.lst) OBJECT(.\Objects\Radar.obj)

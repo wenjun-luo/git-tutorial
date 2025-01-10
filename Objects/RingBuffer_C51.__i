@@ -1,0 +1,1 @@
+"User\RingBuffer_C51.c" LARGE OMF2 OPTIMIZE (0,SPEED) BROWSE INCDIR(.\H;.\User;.\TKDriver\C) DEBUG PRINT(.\Listings\RingBuffer_C51.lst) OBJECT(.\Objects\RingBuffer_C51.obj)

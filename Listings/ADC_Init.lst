@@ -1,0 +1,151 @@
+C51 COMPILER V9.59.0.0   ADC_INIT                                                          01/04/2025 11:59:29 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE ADC_INIT
+OBJECT MODULE PLACED IN .\Objects\ADC_Init.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE c\ADC_Init.c LARGE OMF2 OPTIMIZE(0,SPEED) BROWSE INCDIR(.\H;.\User;.\TKD
+                    -river\C) DEBUG PRINT(.\Listings\ADC_Init.lst) OBJECT(.\Objects\ADC_Init.obj)
+
+line level    source
+
+   1          #include "H/Function_Init.H"
+   2          
+   3          void ADC_Init(uint Channel,uchar ADCFreq);
+   4          uint ADC_GetAverageValue(ADC_SamplesNum_TypeDef ADC_SamplesNum);
+   5          unsigned int ADCValue = 0x0000;
+   6          bit AdcFlag = 0;
+   7          /***********ADC采样频率选择*************/
+   8          enum ADCFreq {F32=0,F24,F16,F12,F8,F6,F4,F3};
+   9          
+  10          /***********ADC采样口选择*************/
+  11          #if (IC_MODEL == SC92F8413)
+              enum Channel {AIN0=0,AIN1,AIN2,AIN3,AIN4,AIN5,AIN6,AIN7,AIN8,AIN9,VDD4=31};
+              #endif
+  14          
+  15          #if (IC_MODEL == SC92F8412)
+              enum Channel {AIN2=2,AIN3,AIN4,AIN5,AIN8=8,AIN9,VDD4=31};
+              #endif
+  18          
+  19          #if (IC_MODEL == SC92F8411)
+  20          enum Channel {AIN2=2,AIN3,AIN4,AIN8=8,AIN9,VDD4=31};
+  21          #endif
+  22          
+  23          /*****************************************************
+  24          *函数名称：void ADC_Test(void)
+  25          *函数功能：ADC测试
+  26          *入口参数：void
+  27          *出口参数：void
+  28          *****************************************************/
+  29          void ADC_Test(void)
+  30          {
+  31   1              ADC_Init(AIN2,F8);
+  32   1              while(1)
+  33   1              {
+  34   2                      ADCValue = ADC_GetAverageValue(ADC_SamplesNum_SixteenTimes);
+  35   2              }
+  36   1      }
+  37          /*****************************************************
+  38          *函数名称：void ADC_Init(uint Channel,uchar ADCFreq)
+  39          *函数功能：ADC初始化
+  40          *入口参数：void
+  41          *出口参数：void
+  42          *****************************************************/
+  43          void ADC_Init(uint Channel,uchar ADCFreq)
+  44          {
+  45   1              ADCCON = 0X80|Channel;          //开启ADC，ADC采样频率为3M ,选择Channel位ADC采样口
+  46   1              if(Channel<8)
+  47   1              {
+  48   2                      ADCCFG0 = 1<<Channel;   //设置Channel作为采样口
+  49   2              }
+  50   1              else
+  51   1              {
+  52   2                      ADCCFG1 = 1<<(Channel-8);   //设置Channel作为采样口
+  53   2              }
+  54   1              ADCCFG2 = ADCFreq;
+C51 COMPILER V9.59.0.0   ADC_INIT                                                          01/04/2025 11:59:29 PAGE 2   
+
+  55   1              IE |= 0X40;        //开启ADC中断
+  56   1              EA = 1;
+  57   1      }
+  58          
+  59          /*****************************************************
+  60          *函数名称：uint ADC_GetAverageValue(uint Channel,ADC_SamplesNum_TypeDef ADC_SamplesNum)
+  61          *函数功能：ADC采样取平均值
+  62          *入口参数：
+  63          ADC_SamplesNum_TypeDef ADC_SamplesNum:采样次数
+  64          *出口参数：
+  65          uint:多次采样平均值
+  66          *****************************************************/
+  67          uint ADC_GetAverageValue(ADC_SamplesNum_TypeDef ADC_SamplesNum)
+  68          {
+  69   1              uchar tmpCnt;
+  70   1              uint tmpValueSum = 0, tmpValue;
+  71   1        uint tmpValue_Max = 0, tmpValue_Min = 0xFFFF;
+  72   1       
+  73   1              for(tmpCnt = 0; tmpCnt < ADC_SamplesNum; tmpCnt ++)
+  74   1        {
+  75   2                      EA = 0;
+  76   2                      OPINX = 0xC1;
+  77   2                OPREG |= 0x10;      //切换至二分频            
+  78   2                      EA = 1;         
+  79   2                      ADCCON |= 0X40;             //开始一次ADC转换
+  80   2                while(!AdcFlag);        //等待ADC转换完成     
+  81   2                      EA = 0;
+  82   2                      OPINX = 0xC1;
+  83   2                OPREG &= 0xCF;      //返回至一分频
+  84   2                      EA = 1; 
+  85   2                      
+  86   2                      AdcFlag = 0;             
+  87   2                tmpValue=(ADCVH<<4)+(ADCVL>>4);     //获取单次转换值
+  88   2                         
+  89   2          if(tmpValue > tmpValue_Max)   //获取多次转换值中的最大值
+  90   2            tmpValue_Max = tmpValue;   
+  91   2          if(tmpValue < tmpValue_Min)   //获取多次转换值中的最小值
+  92   2            tmpValue_Min = tmpValue;          
+  93   2          tmpValueSum += tmpValue;   //累加多次转换值的和
+  94   2        }
+  95   1      
+  96   1              /* 通过硬件乘除法器来计算平均值 */
+  97   1        {
+  98   2          OPERCON |= 0X40;
+  99   2          /* 被除数为16位数据 */
+ 100   2          tmpValueSum -= (tmpValue_Max + tmpValue_Min);
+ 101   2          EXA0 = tmpValueSum;
+ 102   2          EXA1 = tmpValueSum >> 8;
+ 103   2          EXBL = ADC_SamplesNum - 2;                  //除数为8位数据
+ 104   2      
+ 105   2          OPERCON |= 0x80;                            //开始除法计算
+ 106   2          while(OPERCON & 0x80);                      //等待计算完毕
+ 107   2      
+ 108   2          //获取商
+ 109   2          tmpValue = (uint)EXA0;
+ 110   2          tmpValue |= EXA1 << 8;
+ 111   2        }
+ 112   1          return tmpValue;                    //返回平均值
+ 113   1      }
+ 114          
+ 115          void ADC_Interrupt(void) interrupt 6
+ 116          {
+C51 COMPILER V9.59.0.0   ADC_INIT                                                          01/04/2025 11:59:29 PAGE 3   
+
+ 117   1              ADCCON&=~(0X20);  //清中断标志位
+ 118   1              AdcFlag = 1;
+ 119   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    502    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     15    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

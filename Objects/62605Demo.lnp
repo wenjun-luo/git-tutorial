@@ -1,0 +1,16 @@
+".\Objects\STARTUP.obj",
+".\Objects\main.obj",
+".\Objects\IO_Init.obj",
+".\Objects\PWM_Init.obj",
+".\Objects\SSI_Init.obj",
+".\Objects\Timer_Init.obj",
+".\Objects\TKDriver.obj",
+".\User\SC92F8X1X_HighSensitive_lib_T1_L_V2.2.0.LIB",
+".\Objects\RingBuffer_C51.obj",
+".\Objects\project.obj",
+".\Objects\Radar.obj",
+".\Objects\BreatheLED.obj" 
+TO ".\Objects\62605Demo" 
+
+PRINT(".\Listings\62605Demo.map") DISABLEWARNING (16) 
+REMOVEUNUSED 

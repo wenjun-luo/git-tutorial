@@ -1,0 +1,1514 @@
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE SC92F_GPIO
+OBJECT MODULE PLACED IN .\Objects\sc92f_gpio.obj
+COMPILER INVOKED BY: F:\MDK5.36\C51\BIN\C51.EXE User\sc92f_gpio.c LARGE OMF2 OPTIMIZE(8,SPEED) BROWSE INCDIR(C:\Users\Ad
+                    -ministrator\Desktop\SC92F8413_8412_8411_Demo_Code\TKDriver\C;.\User) DEBUG PRINT(.\Listings\sc92f_gpio.lst) OBJECT(.\Obj
+                    -ects\sc92f_gpio.obj)
+
+line level    source
+
+   1          /********************************************************************************
+   2           * @file    sc92f_gpio.c
+   3           * @author  SOC AE Team
+   4           * @version V1.1008
+   5           * @date    10-31-2024
+   6           * @brief   GPIO function module
+   7           *          -This document is for the SinOne 92F/93F/92L series microcontrollers.
+   8           *******************************************************************************
+   9           * @attention
+  10           *
+  11           *1.This software is supplied by SinOne Microelectronics Co.,Ltd. and is only 
+  12           *intended for use with SinOne products. No other uses are authorized. This 
+  13           *software is owned by SinOne Microelectronics Co.,Ltd. and is protected under 
+  14           *all applicable laws, including copyright laws. 
+  15           *2.The software which is for guidance only aims at providing customers with 
+  16           *coding information regarding their products in order for them to save time. 
+  17           *As a result, SinOne shall not be held liable for any direct, indirect or 
+  18           *consequential damages with respect to any claims arising from the content of 
+  19           *such software and/or the use made by customers of the coding information 
+  20           *contained herein in connection with their products.
+  21           *
+  22           *  COPYRIGHT 2024 SinOne Microelectronics
+  23           */
+  24           
+  25          /* Includes ------------------------------------------------------------------*/
+  26          
+  27          #include "sc92f_gpio.h"
+  28          
+  29          /** @addtogroup sc92fxxx_StdPeriph_Driver
+  30           * @{
+  31           */
+  32           
+  33           /** @defgroup GPIO
+  34           * @brief GPIO driver modules
+  35           * @{
+  36           */
+  37           
+  38           /** @defgroup GPIO_Functions
+  39           * @{
+  40           */
+  41           
+  42           /** @defgroup GPIO_Group1 Initialization and Configuration
+  43           *  @brief   Initialization and Configuration
+  44           *
+  45           @verbatim
+  46           ===============================================================================
+  47                              ##### Initialization and Configuration #####
+  48           ===============================================================================
+  49           
+  50           @endverbatim
+  51            * @{
+  52            */
+  53            
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 2   
+
+  54            /**
+  55           * @brief  Deinitializes the GPIOx peripheral registers to their default reset
+  56           *         values.
+  57           * @param  None
+  58           * @retval None
+  59           */
+  60          void GPIO_DeInit(void)
+  61          {
+  62   1        /* Deinitializes the PXCON,PXPH,and PX register to their default reset values. */
+  63   1        P0CON = 0x00;
+  64   1        P0PH = 0x00;
+  65   1        P0 = 0;
+  66   1        P1CON = 0x00;
+  67   1        P1PH = 0x00;
+  68   1        P1 = 0;
+  69   1        P2CON = 0x00;
+  70   1        P2PH = 0x00;
+  71   1        P2 = 0;
+  72   1        /* Deinitializes the P4CON,P4PH,and P4 register to their default reset values for the partial model. */
+  73   1      #if defined(SC92F854x) || defined(SC92F754x) || defined(SC92F844xB) || defined(SC92F744xB) || defined(SC92
+             -F84Ax_2) || defined(SC92F74Ax_2)\
+  74   1              || defined(SC92FWxx) || defined(SC92F859x) || defined(SC92F759x) || defined (SC92R511x)
+                P3CON = 0x00;
+                P3PH = 0x00;
+                P3 = 0;
+                P4CON = 0x00;
+                P4PH = 0x00;
+                P4 = 0;
+              #endif
+  82   1        /* Deinitializes the P5CON,P5PH,and P5 register to their default reset values for the partial model. */
+  83   1      #if !defined(SC92F730x) && !defined(SC92F725X) && !defined(SC92F735X) && !defined(SC92F7003) && !defined(S
+             -C92F8003) && !defined(SC92F8003B) && !defined(SC92F740x) && !defined(SC92F827X) && !defined(SC92F837X)\
+  84   1              && !defined(SC92F730x_2) && !defined(SC92F720x)&&!defined(SC92F7308B)
+  85   1        P5CON = 0x00;
+  86   1        P5PH = 0x00;
+  87   1        P5 = 0;
+  88   1      #endif
+  89   1      }
+  90          
+  91          /**
+  92           * @brief  Initializes the peripheral GPIOx register with the parameters specified in GPIO_InitStruct.
+  93           * @param  GPIOx[in]: where x can be to select the GPIO peripheral. 
+  94           *  SC92F854x,SC92F754x,SC92F844xB,SC92F744xB,SC92F84Ax_2,SC92F74Ax_2,SC92FWxx,SC92F859x,SC92F759x,SC92R51
+             -1x
+  95           *               Selection range(GPIO0 - GPIO5)   
+  96           *  SC92F730x,SC92F725X,SC92F735X,SC92F8003,SC92F8003B,SC92F740x,SC92F827X,SC92F837X,SC92F7003,SC92F730x_2
+             -,SC92F720x/
+  97           *  SC92F7308B
+  98           *               Selection range(GPIO0 - GPIO2)
+  99           *  else model  
+ 100           *               Selection range(GPIO0 - GPIO2,GPIO5)
+ 101           *               - GPIO0: select the GPIO0 peripheral
+ 102           *               - GPIO1: select the GPIO1 peripheral
+ 103           *               - GPIO2: select the GPIO2 peripheral
+ 104           *               - GPIO3: select the GPIO3 peripheral
+ 105           *               - GPIO4: select the GPIO4 peripheral
+ 106           *               - GPIO5: select the GPIO5 peripheral
+ 107           * @param  PortPins[in]: The input port pin value.
+ 108           *                   - GPIO_Pin_0:Pin 0 selected  
+ 109           *                   - GPIO_Pin_1:Pin 1 selected  
+ 110           *                   - GPIO_Pin_2:Pin 2 selected   
+ 111           *                   - GPIO_Pin_3:Pin 3 selected    
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 3   
+
+ 112           *                   - GPIO_Pin_4:Pin 4 selected    
+ 113           *                   - GPIO_Pin_5:Pin 5 selected    
+ 114           *                   - GPIO_Pin_6:Pin 6 selected    
+ 115           *                   - GPIO_Pin_7:Pin 7 selected   
+ 116           *                   - GPIO_PIN_LNIB:Pin Low 4 Bits selected             
+ 117           *                   - GPIO_PIN_HNIB:Pin High 4 Bits selected
+ 118           *                   - GPIO_PIN_All:All pins selected 
+ 119           * @param  GPIO_Mode[in]: Specifies the operating mode for the selected pins. 
+ 120           *                   - GPIO_MODE_IN_HI:GPIO High-resistance Input Mode
+ 121           *                   - GPIO_MODE_IN_PU:GPIO Pull-up Input Mode
+ 122           *                   - GPIO_MODE_OUT_PP:GPIO Strong push-pull Output Mode
+ 123           * @retval None
+ 124           */
+ 125          void GPIO_Init(GPIO_TypeDef GPIOx,
+ 126                         uint8_t PortPins, GPIO_Mode_TypeDef GPIO_Mode)
+ 127          {
+ 128   1        if(GPIOx == GPIO0)
+ 129   1        {
+ 130   2          if(GPIO_Mode == GPIO_MODE_IN_HI)
+ 131   2          {
+ 132   3            /* Configure Pins to High-resistance output mode */
+ 133   3            P0CON &= ~PortPins;
+ 134   3            P0PH &= ~PortPins;
+ 135   3          }
+ 136   2      
+ 137   2          if(GPIO_Mode == GPIO_MODE_IN_PU)
+ 138   2          {
+ 139   3            /* Configure Pins to Pull-up input mode */  
+ 140   3            P0CON &= ~PortPins;
+ 141   3            P0PH |= PortPins;
+ 142   3          }
+ 143   2      
+ 144   2          if(GPIO_Mode == GPIO_MODE_OUT_PP)
+ 145   2          {
+ 146   3            /* Configure Pins to Strong push-pull output mode */  
+ 147   3            P0CON |= PortPins;
+ 148   3          }
+ 149   2        }
+ 150   1        else if(GPIOx == GPIO1)
+ 151   1        {
+ 152   2          if(GPIO_Mode == GPIO_MODE_IN_HI)
+ 153   2          {
+ 154   3            /* Configure Pins to High-resistance output mode */
+ 155   3            P1CON &= ~PortPins;
+ 156   3            P1PH &= ~PortPins;
+ 157   3          }
+ 158   2      
+ 159   2          if(GPIO_Mode == GPIO_MODE_IN_PU)
+ 160   2          {
+ 161   3            /* Configure Pins to Pull-up input mode */  
+ 162   3            P1CON &= ~PortPins;
+ 163   3            P1PH |= PortPins;
+ 164   3          }
+ 165   2      
+ 166   2          if(GPIO_Mode == GPIO_MODE_OUT_PP)
+ 167   2          {
+ 168   3            /* Configure Pins to Strong push-pull output mode */    
+ 169   3            P1CON |= PortPins;
+ 170   3          }
+ 171   2        }
+ 172   1        else if(GPIOx == GPIO2)
+ 173   1        {
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 4   
+
+ 174   2          if(GPIO_Mode == GPIO_MODE_IN_HI)
+ 175   2          {
+ 176   3            /* Configure Pins to High-resistance output mode */
+ 177   3            P2CON &= ~PortPins;
+ 178   3            P2PH &= ~PortPins;
+ 179   3          }
+ 180   2      
+ 181   2          if(GPIO_Mode == GPIO_MODE_IN_PU)
+ 182   2          {
+ 183   3            /* Configure Pins to Pull-up input mode */  
+ 184   3            P2CON &= ~PortPins;
+ 185   3            P2PH |= PortPins;
+ 186   3          }
+ 187   2      
+ 188   2          if(GPIO_Mode == GPIO_MODE_OUT_PP)
+ 189   2          {
+ 190   3            /* Configure Pins to Strong push-pull output mode */    
+ 191   3            P2CON |= PortPins;
+ 192   3          }
+ 193   2        }
+ 194   1      
+ 195   1      #if defined(SC92F854x) || defined(SC92F754x) || defined(SC92F844xB) || defined(SC92F744xB) || defined(SC92
+             -F84Ax_2) || defined(SC92F74Ax_2)\
+ 196   1              || defined(SC92FWxx) || defined(SC92F859x) || defined(SC92F759x) || defined (SC92R511x)
+                else if(GPIOx == GPIO3)
+                {
+                  if(GPIO_Mode == GPIO_MODE_IN_HI)
+                  {
+                    /* Configure Pins to High-resistance output mode */  
+                    P3CON &= ~PortPins;
+                    P3PH &= ~PortPins;
+                  }
+              
+                  if(GPIO_Mode == GPIO_MODE_IN_PU)
+                  {
+                    /* Configure Pins to Pull-up input mode */  
+                    P3CON &= ~PortPins;
+                    P3PH |= PortPins;
+                  }
+              
+                  if(GPIO_Mode == GPIO_MODE_OUT_PP)
+                  {
+                    /* Configure Pins to Strong push-pull output mode */    
+                    P3CON |= PortPins;
+                  }
+                }
+                else if(GPIOx == GPIO4)
+                {
+                  if(GPIO_Mode == GPIO_MODE_IN_HI)
+                  {
+                    /* Configure Pins to High-resistance output mode */  
+                    P4CON &= ~PortPins;
+                    P4PH &= ~PortPins;
+                  }
+              
+                  if(GPIO_Mode == GPIO_MODE_IN_PU)
+                  {
+                    /* Configure Pins to Pull-up input mode */  
+                    P4CON &= ~PortPins;
+                    P4PH |= PortPins;
+                  }
+              
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 5   
+
+                  if(GPIO_Mode == GPIO_MODE_OUT_PP)
+                  {
+                    /* Configure Pins to Strong push-pull output mode */    
+                    P4CON |= PortPins;
+                  }
+                }
+              
+              #endif
+ 243   1      #if !defined(SC92F730x) && !defined(SC92F725X) && !defined(SC92F735X) && !defined(SC92F7003) && !defined(S
+             -C92F8003) && !defined(SC92F8003B) && !defined(SC92F740x) && !defined(SC92F827X) && !defined(SC92F837X)\
+ 244   1               && !defined(SC92F730x_2) && !defined(SC92F720x) &&!defined(SC92F7308B)
+ 245   1        else if(GPIOx == GPIO5)
+ 246   1        {
+ 247   2          if(GPIO_Mode == GPIO_MODE_IN_HI)
+ 248   2          {
+ 249   3            /* Configure Pins to High-resistance output mode */  
+ 250   3            P5CON &= ~PortPins;
+ 251   3            P5PH &= ~PortPins;
+ 252   3          }
+ 253   2      
+ 254   2          if(GPIO_Mode == GPIO_MODE_IN_PU)
+ 255   2          {
+ 256   3            /* Configure Pins to Pull-up input mode */  
+ 257   3            P5CON &= ~PortPins;
+ 258   3            P5PH |= PortPins;
+ 259   3          }
+ 260   2      
+ 261   2          if(GPIO_Mode == GPIO_MODE_OUT_PP)
+ 262   2          {
+ 263   3            /* Configure Pins to Strong push-pull output mode */    
+ 264   3            P5CON |= PortPins;
+ 265   3          }
+ 266   2        }
+ 267   1      
+ 268   1      #endif
+ 269   1      }
+ 270          
+ 271          
+ 272           /**
+ 273           * @}
+ 274           */
+ 275           /* End of GPIO_Group1. */
+ 276          
+ 277          /** @defgroup GPIO_Group2 IO operation functions
+ 278            *  @brief   GPIO Read and Write
+ 279            *
+ 280          @verbatim
+ 281           ===============================================================================
+ 282                                 ##### IO operation functions #####
+ 283           ===============================================================================
+ 284          
+ 285          @endverbatim
+ 286            * @{
+ 287            */
+ 288          
+ 289          /**
+ 290           * @brief  Sets the selected data port bits.
+ 291           * @param  GPIOx[in]: where x can be to select the GPIO peripheral. 
+ 292           *  SC92F854x,SC92F754x,SC92F844xB,SC92F744xB,SC92F84Ax_2,SC92F74Ax_2,SC92FWxx,SC92F859x,SC92F759x,SC92R51
+             -1x
+ 293           *               Selection range(GPIO0 - GPIO5)   
+ 294           *  SC92F730x,SC92F725X,SC92F735X,SC92F8003,SC92F8003B,SC92F740x,SC92F827X,SC92F837X,SC92F7003,SC92F730x_2
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 6   
+
+             -,SC92F720x/
+ 295           *  SC92F7308B
+ 296           *               Selection range(GPIO0 - GPIO2)
+ 297           *  else model  
+ 298           *               Selection range(GPIO0 - GPIO2,GPIO5)
+ 299           *               - GPIO0: select the GPIO0 peripheral
+ 300           *               - GPIO1: select the GPIO1 peripheral
+ 301           *               - GPIO2: select the GPIO2 peripheral
+ 302           *               - GPIO3: select the GPIO3 peripheral
+ 303           *               - GPIO4: select the GPIO4 peripheral
+ 304           *               - GPIO5: select the GPIO5 peripheral
+ 305           * @param  PortVal[in]: The value of the port data register to be written.
+ 306           * @retval None
+ 307           */
+ 308          void GPIO_Write(GPIO_TypeDef GPIOx,uint8_t PortVal)
+ 309          {
+ 310   1        if(GPIOx == GPIO0)
+ 311   1        {
+ 312   2          /* Set written value to P0 port data register */  
+ 313   2          P0 = PortVal;
+ 314   2        }
+ 315   1      
+ 316   1        if(GPIOx == GPIO1)
+ 317   1        {
+ 318   2          /* Set written value to P1 port data register */  
+ 319   2          P1 = PortVal;
+ 320   2        }
+ 321   1      
+ 322   1        if(GPIOx == GPIO2)
+ 323   1        {
+ 324   2          /* Set written value to P2 port data register */    
+ 325   2          P2 = PortVal;
+ 326   2        }
+ 327   1      
+ 328   1      #if defined(SC92F854x) || defined(SC92F754x) || defined(SC92F844xB) || defined(SC92F744xB) || defined(SC92
+             -F84Ax_2) || defined(SC92F74Ax_2)\
+ 329   1              || defined(SC92FWxx) || defined(SC92F859x) || defined(SC92F759x) || defined (SC92R511x)
+              
+                if(GPIOx == GPIO3)
+                {
+                  /* Set written value to P3 port data register */    
+                  P3 = PortVal;
+                }
+              
+                if(GPIOx == GPIO4)
+                {
+                  /* Set written value to P4 port data register */    
+                  P4 = PortVal;
+                }
+              
+              #endif
+ 344   1      #if !defined(SC92F730x) && !defined(SC92F725X) && !defined(SC92F735X) && !defined(SC92F8003) && !defined(S
+             -C92F8003B) && !defined(SC92F740x) && !defined(SC92F827X) && !defined(SC92F837X) && !defined(SC92F7003)\
+ 345   1              && !defined(SC92F730x_2) && !defined(SC92F720x) &&!defined(SC92F7308B)
+ 346   1      
+ 347   1        if(GPIOx == GPIO5)
+ 348   1        {
+ 349   2          /* Set written value to P5 port data register */    
+ 350   2          P5 = PortVal;
+ 351   2        }
+ 352   1      
+ 353   1      #endif
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 7   
+
+ 354   1      }
+ 355          
+ 356          /**
+ 357           * @brief  Sets the selected data port bits.
+ 358           * @param  GPIOx[in]: where x can be to select the GPIO peripheral. 
+ 359           *  SC92F854x,SC92F754x,SC92F844xB,SC92F744xB,SC92F84Ax_2,SC92F74Ax_2,SC92FWxx,SC92F859x,SC92F759x,SC92R51
+             -1x
+ 360           *               Selection range(GPIO0 - GPIO5)   
+ 361           *  SC92F730x,SC92F725X,SC92F735X,SC92F8003,SC92F8003B,SC92F740x,SC92F827X,SC92F837X,SC92F7003,SC92F730x_2
+             -,SC92F720x/
+ 362           *  SC92F7308B
+ 363           *               Selection range(GPIO0 - GPIO2)
+ 364           *  else model  
+ 365           *               Selection range(GPIO0 - GPIO2,GPIO5)
+ 366           *               - GPIO0: select the GPIO0 peripheral
+ 367           *               - GPIO1: select the GPIO1 peripheral
+ 368           *               - GPIO2: select the GPIO2 peripheral
+ 369           *               - GPIO3: select the GPIO3 peripheral
+ 370           *               - GPIO4: select the GPIO4 peripheral
+ 371           *               - GPIO5: select the GPIO5 peripheral
+ 372           * @param  GPIO_Pin[in]: specifies the port bit to be written.
+ 373           *                   - GPIO_Pin_0:Pin 0 selected  
+ 374           *                   - GPIO_Pin_1:Pin 1 selected  
+ 375           *                   - GPIO_Pin_2:Pin 2 selected   
+ 376           *                   - GPIO_Pin_3:Pin 3 selected    
+ 377           *                   - GPIO_Pin_4:Pin 4 selected    
+ 378           *                   - GPIO_Pin_5:Pin 5 selected    
+ 379           *                   - GPIO_Pin_6:Pin 6 selected    
+ 380           *                   - GPIO_Pin_7:Pin 7 selected   
+ 381           *                   - GPIO_PIN_LNIB:Pin Low 4 Bits selected             
+ 382           *                   - GPIO_PIN_HNIB:Pin High 4 Bits selected
+ 383           *                   - GPIO_PIN_All:All pins selected 
+ 384           * @retval None
+ 385           */
+ 386          void GPIO_WriteHigh(GPIO_TypeDef GPIOx,
+ 387                              uint8_t PortPins)
+ 388          {
+ 389   1        if(GPIOx == GPIO0)
+ 390   1        {
+ 391   2                if((PortPins&0x01))
+ 392   2                {   
+ 393   3                  IO00 = 1;
+ 394   3                }
+ 395   2                                        if((PortPins&0x02))
+ 396   2                      {   
+ 397   3                  IO01 = 1;
+ 398   3                }     
+ 399   2                                        if((PortPins&0x04))
+ 400   2                      {   
+ 401   3                  IO02 = 1;
+ 402   3                }     
+ 403   2                                        if((PortPins&0x08))
+ 404   2                      {   
+ 405   3                  IO03 = 1;
+ 406   3                }     
+ 407   2                                              if((PortPins&0x10))
+ 408   2                      {   
+ 409   3                  IO04 = 1;
+ 410   3                }     
+ 411   2                                        if((PortPins&0x20))
+ 412   2                      {   
+ 413   3                  IO05 = 1;
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 8   
+
+ 414   3                }     
+ 415   2                                              if((PortPins&0x40))
+ 416   2                      {   
+ 417   3                  IO06 = 1;
+ 418   3                }
+ 419   2                                              if((PortPins&0x80))
+ 420   2                      {   
+ 421   3                  IO07 = 1;
+ 422   3                }     
+ 423   2        }
+ 424   1      
+ 425   1        if(GPIOx == GPIO1)
+ 426   1        {
+ 427   2                if((PortPins&0x01))
+ 428   2                {   
+ 429   3                  IO10 = 1;
+ 430   3                }
+ 431   2                                        if((PortPins&0x02))
+ 432   2                      {   
+ 433   3                  IO11 = 1;
+ 434   3                }     
+ 435   2                                        if((PortPins&0x04))
+ 436   2                      {   
+ 437   3                  IO12 = 1;
+ 438   3                }     
+ 439   2                                        if((PortPins&0x08))
+ 440   2                      {   
+ 441   3                  IO13 = 1;
+ 442   3                }     
+ 443   2                                              if((PortPins&0x10))
+ 444   2                      {   
+ 445   3                  IO14 = 1;
+ 446   3                }     
+ 447   2                                        if((PortPins&0x20))
+ 448   2                      {   
+ 449   3                  IO15 = 1;
+ 450   3                }     
+ 451   2                                              if((PortPins&0x40))
+ 452   2                      {   
+ 453   3                  IO16 = 1;
+ 454   3                }
+ 455   2                                              if((PortPins&0x80))
+ 456   2                      {   
+ 457   3                  IO17 = 1;
+ 458   3                }     
+ 459   2        }
+ 460   1      
+ 461   1        if(GPIOx == GPIO2)
+ 462   1        {
+ 463   2                if((PortPins&0x01))
+ 464   2                {   
+ 465   3                  IO20 = 1;
+ 466   3                }
+ 467   2                                        if((PortPins&0x02))
+ 468   2                      {   
+ 469   3                  IO21 = 1;
+ 470   3                }     
+ 471   2                                        if((PortPins&0x04))
+ 472   2                      {   
+ 473   3                  IO22 = 1;
+ 474   3                }     
+ 475   2                                        if((PortPins&0x08))
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 9   
+
+ 476   2                      {   
+ 477   3                  IO23 = 1;
+ 478   3                }     
+ 479   2                                              if((PortPins&0x10))
+ 480   2                      {   
+ 481   3                  IO24 = 1;
+ 482   3                }     
+ 483   2                                        if((PortPins&0x20))
+ 484   2                      {   
+ 485   3                  IO25 = 1;
+ 486   3                }     
+ 487   2                                              if((PortPins&0x40))
+ 488   2                      {   
+ 489   3                  IO26 = 1;
+ 490   3                }
+ 491   2                                              if((PortPins&0x80))
+ 492   2                      {   
+ 493   3                  IO27 = 1;
+ 494   3                }     
+ 495   2        }
+ 496   1      
+ 497   1      #if defined(SC92F854x) || defined(SC92F754x) || defined(SC92F844xB) || defined(SC92F744xB) || defined(SC92
+             -F84Ax_2) || defined(SC92F74Ax_2)\
+ 498   1              || defined(SC92FWxx) || defined(SC92F859x) || defined(SC92F759x) || defined (SC92R511x)
+              
+                if(GPIOx == GPIO3)
+                {
+                        if((PortPins&0x01))
+                        {   
+                          IO30 = 1;
+                        }
+                                                if((PortPins&0x02))
+                              {   
+                          IO31 = 1;
+                        }     
+                                                if((PortPins&0x04))
+                              {   
+                          IO32 = 1;
+                        }     
+                                                if((PortPins&0x08))
+                              {   
+                          IO33 = 1;
+                        }     
+                                                      if((PortPins&0x10))
+                              {   
+                          IO34 = 1;
+                        }     
+                                                if((PortPins&0x20))
+                              {   
+                          IO35 = 1;
+                        }     
+                                                      if((PortPins&0x40))
+                              {   
+                          IO36 = 1;
+                        }
+                                                      if((PortPins&0x80))
+                              {   
+                          IO37 = 1;
+                        }     
+                }
+              
+                if(GPIOx == GPIO4)
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 10  
+
+                {
+                        if((PortPins&0x01))
+                        {   
+                          IO40 = 1;
+                        }
+                                                if((PortPins&0x02))
+                              {   
+                          IO41 = 1;
+                        }     
+                                                if((PortPins&0x04))
+                              {   
+                          IO42 = 1;
+                        }     
+                                                if((PortPins&0x08))
+                              {   
+                          IO43 = 1;
+                        }     
+                                                      if((PortPins&0x10))
+                              {   
+                          IO44 = 1;
+                        }     
+                                                if((PortPins&0x20))
+                              {   
+                          IO45 = 1;
+                        }     
+                                                      if((PortPins&0x40))
+                              {   
+                          IO46 = 1;
+                        }
+                                                      if((PortPins&0x80))
+                              {   
+                          IO47 = 1;
+                        }
+                }
+              
+              #endif
+ 573   1      #if !defined(SC92F730x) && !defined(SC92F725X) && !defined(SC92F735X) && !defined(SC92F8003) && !defined(S
+             -C92F8003B) && !defined(SC92F740x) && !defined(SC92F827X) && !defined(SC92F837X) && !defined(SC92F7003)\
+ 574   1              && !defined(SC92F730x_2) && !defined(SC92F720x) &&! defined(SC92F7308B)
+ 575   1      
+ 576   1        if(GPIOx == GPIO5)
+ 577   1        {
+ 578   2                if((PortPins&0x01))
+ 579   2                {   
+ 580   3                  IO50 = 1;
+ 581   3                }
+ 582   2                                        if((PortPins&0x02))
+ 583   2                      {   
+ 584   3                  IO51 = 1;
+ 585   3                }     
+ 586   2                                        if((PortPins&0x04))
+ 587   2                      {   
+ 588   3                  IO52 = 1;
+ 589   3                }     
+ 590   2                                        if((PortPins&0x08))
+ 591   2                      {   
+ 592   3                  IO53 = 1;
+ 593   3                }     
+ 594   2                                              if((PortPins&0x10))
+ 595   2                      {   
+ 596   3                  IO54 = 1;
+ 597   3                }     
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 11  
+
+ 598   2                                        if((PortPins&0x20))
+ 599   2                      {   
+ 600   3                  IO55 = 1;
+ 601   3                }     
+ 602   2        }
+ 603   1      
+ 604   1      #endif
+ 605   1      }
+ 606          
+ 607          /**
+ 608           * @brief  Clears the specified data port bit.
+ 609           * @param  GPIOx[in]: where x can be to select the GPIO peripheral. 
+ 610           *  SC92F854x,SC92F754x,SC92F844xB,SC92F744xB,SC92F84Ax_2,SC92F74Ax_2,SC92FWxx,SC92F859x,SC92F759x,SC92R51
+             -1x
+ 611           *               Selection range(GPIO0 - GPIO5)   
+ 612           *  SC92F730x,SC92F725X,SC92F735X,SC92F8003,SC92F8003B,SC92F740x,SC92F827X,SC92F837X,SC92F7003,SC92F730x_2
+             -,SC92F720x/
+ 613           *  SC92F7308B
+ 614           *               Selection range(GPIO0 - GPIO2)
+ 615           *  else model  
+ 616           *               Selection range(GPIO0 - GPIO2,GPIO5)
+ 617           *               - GPIO0: select the GPIO0 peripheral
+ 618           *               - GPIO1: select the GPIO1 peripheral
+ 619           *               - GPIO2: select the GPIO2 peripheral
+ 620           *               - GPIO3: select the GPIO3 peripheral
+ 621           *               - GPIO4: select the GPIO4 peripheral
+ 622           *               - GPIO5: select the GPIO5 peripheral
+ 623           * @param  PortPins[in]: specifies the port bit to be written.
+ 624           *                   - GPIO_Pin_0:Pin 0 selected  
+ 625           *                   - GPIO_Pin_1:Pin 1 selected  
+ 626           *                   - GPIO_Pin_2:Pin 2 selected   
+ 627           *                   - GPIO_Pin_3:Pin 3 selected    
+ 628           *                   - GPIO_Pin_4:Pin 4 selected    
+ 629           *                   - GPIO_Pin_5:Pin 5 selected    
+ 630           *                   - GPIO_Pin_6:Pin 6 selected    
+ 631           *                   - GPIO_Pin_7:Pin 7 selected   
+ 632           *                   - GPIO_PIN_LNIB:Pin Low 4 Bits selected             
+ 633           *                   - GPIO_PIN_HNIB:Pin High 4 Bits selected
+ 634           *                   - GPIO_PIN_All:All pins selected 
+ 635           * @retval None
+ 636           */
+ 637          void GPIO_WriteLow(GPIO_TypeDef GPIOx,
+ 638                             uint8_t PortPins)
+ 639          {
+ 640   1        if(GPIOx == GPIO0)
+ 641   1        {
+ 642   2                            if((PortPins&0x01))
+ 643   2                {   
+ 644   3                  IO00 = 0;
+ 645   3                }
+ 646   2                                        if((PortPins&0x02))
+ 647   2                      {   
+ 648   3                  IO01 = 0;
+ 649   3                }     
+ 650   2                                        if((PortPins&0x04))
+ 651   2                      {   
+ 652   3                  IO02 = 0;
+ 653   3                }     
+ 654   2                                        if((PortPins&0x08))
+ 655   2                      {   
+ 656   3                  IO03 = 0;
+ 657   3                }     
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 12  
+
+ 658   2                                              if((PortPins&0x10))
+ 659   2                      {   
+ 660   3                  IO04 = 0;
+ 661   3                }     
+ 662   2                                        if((PortPins&0x20))
+ 663   2                      {   
+ 664   3                  IO05 = 0;
+ 665   3                }     
+ 666   2                                              if((PortPins&0x40))
+ 667   2                      {   
+ 668   3                  IO06 = 0;
+ 669   3                }
+ 670   2                                              if((PortPins&0x80))
+ 671   2                      {   
+ 672   3                  IO07 = 0;
+ 673   3                }
+ 674   2        }
+ 675   1      
+ 676   1        if(GPIOx == GPIO1)
+ 677   1        {
+ 678   2                            if((PortPins&0x01))
+ 679   2                {   
+ 680   3                  IO10 = 0;
+ 681   3                }
+ 682   2                                        if((PortPins&0x02))
+ 683   2                      {   
+ 684   3                  IO11 = 0;
+ 685   3                }     
+ 686   2                                        if((PortPins&0x04))
+ 687   2                      {   
+ 688   3                  IO12 = 0;
+ 689   3                }     
+ 690   2                                        if((PortPins&0x08))
+ 691   2                      {   
+ 692   3                  IO13 = 0;
+ 693   3                }     
+ 694   2                                              if((PortPins&0x10))
+ 695   2                      {   
+ 696   3                  IO14 = 0;
+ 697   3                }     
+ 698   2                                        if((PortPins&0x20))
+ 699   2                      {   
+ 700   3                  IO15 = 0;
+ 701   3                }     
+ 702   2                                              if((PortPins&0x40))
+ 703   2                      {   
+ 704   3                  IO16 = 0;
+ 705   3                }
+ 706   2                                              if((PortPins&0x80))
+ 707   2                      {   
+ 708   3                  IO17 = 0;
+ 709   3                }
+ 710   2        }
+ 711   1      
+ 712   1        if(GPIOx == GPIO2)
+ 713   1        {
+ 714   2                                       if((PortPins&0x01))
+ 715   2                {   
+ 716   3                  IO20 = 0;
+ 717   3                }
+ 718   2                                        if((PortPins&0x02))
+ 719   2                      {   
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 13  
+
+ 720   3                  IO21 = 0;
+ 721   3                }     
+ 722   2                                        if((PortPins&0x04))
+ 723   2                      {   
+ 724   3                  IO22 = 0;
+ 725   3                }     
+ 726   2                                        if((PortPins&0x08))
+ 727   2                      {   
+ 728   3                  IO23 = 0;
+ 729   3                }     
+ 730   2                                              if((PortPins&0x10))
+ 731   2                      {   
+ 732   3                  IO24 = 0;
+ 733   3                }     
+ 734   2                                        if((PortPins&0x20))
+ 735   2                      {   
+ 736   3                  IO25 = 0;
+ 737   3                }     
+ 738   2                                              if((PortPins&0x40))
+ 739   2                      {   
+ 740   3                  IO26 = 0;
+ 741   3                }
+ 742   2                                              if((PortPins&0x80))
+ 743   2                      {   
+ 744   3                  IO27 = 0;
+ 745   3                }
+ 746   2        }
+ 747   1      
+ 748   1      #if defined(SC92F854x) || defined(SC92F754x) || defined(SC92F844xB) || defined(SC92F744xB) || defined(SC92
+             -F84Ax_2) || defined(SC92F74Ax_2)\
+ 749   1              || defined(SC92FWxx) || defined(SC92F859x) || defined(SC92F759x) || defined (SC92R511x)
+              
+                if(GPIOx == GPIO3)
+                {
+                                    if((PortPins&0x01))
+                        {   
+                          IO30 = 0;
+                        }
+                                                if((PortPins&0x02))
+                              {   
+                          IO31 = 0;
+                        }     
+                                                if((PortPins&0x04))
+                              {   
+                          IO32 = 0;
+                        }     
+                                                if((PortPins&0x08))
+                              {   
+                          IO33 = 0;
+                        }     
+                                                      if((PortPins&0x10))
+                              {   
+                          IO34 = 0;
+                        }     
+                                                if((PortPins&0x20))
+                              {   
+                          IO35 = 0;
+                        }     
+                                                      if((PortPins&0x40))
+                              {   
+                          IO36 = 0;
+                        }
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 14  
+
+                                                      if((PortPins&0x80))
+                              {   
+                          IO37 = 0;
+                        }
+                }
+              
+                if(GPIOx == GPIO4)
+                {
+                                    if((PortPins&0x01))
+                        {   
+                          IO40 = 0;
+                        }
+                                                if((PortPins&0x02))
+                              {   
+                          IO41 = 0;
+                        }     
+                                                if((PortPins&0x04))
+                              {   
+                          IO42 = 0;
+                        }     
+                                                if((PortPins&0x08))
+                              {   
+                          IO43 = 0;
+                        }     
+                                                      if((PortPins&0x10))
+                              {   
+                          IO44 = 0;
+                        }     
+                                                if((PortPins&0x20))
+                              {   
+                          IO45 = 0;
+                        }     
+                                                      if((PortPins&0x40))
+                              {   
+                          IO46 = 0;
+                        }
+                                                      if((PortPins&0x80))
+                              {   
+                          IO47 = 0;
+                        }
+                }
+              
+              #endif
+ 824   1      #if !defined(SC92F730x) && !defined(SC92F725X) && !defined(SC92F735X) && !defined(SC92F8003) && !defined(S
+             -C92F8003B) && !defined(SC92F740x) && !defined(SC92F827X) && !defined(SC92F837X) && !defined(SC92F7003)\
+ 825   1              && !defined(SC92F730x_2) && !defined(SC92F720x)&&!defined(SC92F7308B)
+ 826   1      
+ 827   1        if(GPIOx == GPIO5)
+ 828   1        {
+ 829   2                            if((PortPins&0x01))
+ 830   2                {   
+ 831   3                  IO50 = 0;
+ 832   3                }
+ 833   2                                        if((PortPins&0x02))
+ 834   2                      {   
+ 835   3                  IO51 = 0;
+ 836   3                }     
+ 837   2                                        if((PortPins&0x04))
+ 838   2                      {   
+ 839   3                  IO52 = 0;
+ 840   3                }     
+ 841   2                                        if((PortPins&0x08))
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 15  
+
+ 842   2                      {   
+ 843   3                  IO53 = 0;
+ 844   3                }     
+ 845   2                                              if((PortPins&0x10))
+ 846   2                      {   
+ 847   3                  IO54 = 0;
+ 848   3                }     
+ 849   2                                        if((PortPins&0x20))
+ 850   2                      {   
+ 851   3                  IO55 = 0;
+ 852   3                }
+ 853   2        }
+ 854   1      
+ 855   1      #endif
+ 856   1      }
+ 857          
+ 858          /**
+ 859           * @brief  Reads the specified input port pin.
+ 860           * @param  GPIOx[in]: where x can be to select the GPIO peripheral. 
+ 861           *  SC92F854x,SC92F754x,SC92F844xB,SC92F744xB,SC92F84Ax_2,SC92F74Ax_2,SC92FWxx,SC92F859x,SC92F759x,SC92R51
+             -1x
+ 862           *               Selection range(GPIO0 - GPIO5)   
+ 863           *  SC92F730x,SC92F725X,SC92F735X,SC92F8003,SC92F8003B,SC92F740x,SC92F827X,SC92F837X,SC92F7003,SC92F730x_2
+             -,SC92F720x/
+ 864           *  SC92F7308B
+ 865           *               Selection range(GPIO0 - GPIO2)
+ 866           *  else model  
+ 867           *               Selection range(GPIO0 - GPIO2,GPIO5)
+ 868           *               - GPIO0: select the GPIO0 peripheral
+ 869           *               - GPIO1: select the GPIO1 peripheral
+ 870           *               - GPIO2: select the GPIO2 peripheral
+ 871           *               - GPIO3: select the GPIO3 peripheral
+ 872           *               - GPIO4: select the GPIO4 peripheral
+ 873           *               - GPIO5: select the GPIO5 peripheral
+ 874           * @retval The input port pin value.
+ 875           */
+ 876          uint8_t GPIO_ReadPort(GPIO_TypeDef GPIOx)
+ 877          {
+ 878   1        if(GPIOx == GPIO0)
+ 879   1        {
+ 880   2          return P0;
+ 881   2        }
+ 882   1        else if(GPIOx == GPIO1)
+ 883   1        {
+ 884   2          return P1;
+ 885   2        }
+ 886   1        else if(GPIOx == GPIO2)
+ 887   1        {
+ 888   2          return P2;
+ 889   2        }
+ 890   1      
+ 891   1      #if defined(SC92F854x) || defined(SC92F754x) || defined(SC92F844xB) || defined(SC92F744xB) || defined(SC92
+             -F84Ax_2) || defined(SC92F74Ax_2)\
+ 892   1              || defined(SC92FWxx) || defined(SC92F859x) || defined(SC92F759x) || defined (SC92R511x)
+                else if(GPIOx == GPIO3)
+                {
+                  return P3;
+                }
+                else if(GPIOx == GPIO4)
+                {
+                  return P4;
+                }
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 16  
+
+              
+              #endif
+ 903   1      #if !defined(SC92F730x) && !defined(SC92F725X) && !defined(SC92F735X) && !defined(SC92F8003) && !defined(S
+             -C92F8003B) && !defined(SC92F740x) && !defined(SC92F827X) && !defined(SC92F837X) && !defined(SC92F7003)\
+ 904   1              && !defined(SC92F730x_2) && !defined(SC92F720x) &&!defined(SC92F7308B)
+ 905   1        else if(GPIOx == GPIO5)
+ 906   1        {
+ 907   2          return P5;
+ 908   2        }
+ 909   1      
+ 910   1      #endif
+ 911   1        else
+ 912   1        {
+ 913   2          return 0;
+ 914   2        }
+ 915   1      }
+ 916          
+ 917          
+ 918          /**
+ 919           * @brief  Reads the selected data port bits.
+ 920           * @param  GPIOx[in]: where x can be to select the GPIO peripheral. 
+ 921           *  SC92F854x,SC92F754x,SC92F844xB,SC92F744xB,SC92F84Ax_2,SC92F74Ax_2,SC92FWxx,SC92F859x,SC92F759x,SC92R51
+             -1x
+ 922           *               Selection range(GPIO0 - GPIO5)   
+ 923           *  SC92F730x,SC92F725X,SC92F735X,SC92F8003,SC92F8003B,SC92F740x,SC92F827X,SC92F837X,SC92F7003,SC92F730x_2
+             -,SC92F720x/
+ 924           *  SC92F7308B
+ 925           *               Selection range(GPIO0 - GPIO2)
+ 926           *  else model  
+ 927           *               Selection range(GPIO0 - GPIO2,GPIO5)
+ 928           *               - GPIO0: select the GPIO0 peripheral
+ 929           *               - GPIO1: select the GPIO1 peripheral
+ 930           *               - GPIO2: select the GPIO2 peripheral
+ 931           *               - GPIO3: select the GPIO3 peripheral
+ 932           *               - GPIO4: select the GPIO4 peripheral
+ 933           *               - GPIO5: select the GPIO5 peripheral
+ 934           * @param  PortPins[in]: specifies the port bit to be written.
+ 935           *                   - GPIO_Pin_0:Pin 0 selected  
+ 936           *                   - GPIO_Pin_1:Pin 1 selected  
+ 937           *                   - GPIO_Pin_2:Pin 2 selected   
+ 938           *                   - GPIO_Pin_3:Pin 3 selected    
+ 939           *                   - GPIO_Pin_4:Pin 4 selected    
+ 940           *                   - GPIO_Pin_5:Pin 5 selected    
+ 941           *                   - GPIO_Pin_6:Pin 6 selected    
+ 942           *                   - GPIO_Pin_7:Pin 7 selected   
+ 943           *                   - GPIO_PIN_LNIB:Pin Low 4 Bits selected             
+ 944           *                   - GPIO_PIN_HNIB:Pin High 4 Bits selected
+ 945           *                   - GPIO_PIN_All:All pins selected 
+ 946           * @retval Bit state
+ 947           *              - Bit_RESET 
+ 948           *              - Bit_SET
+ 949           */
+ 950          BitStatus GPIO_ReadPin(GPIO_TypeDef GPIOx,
+ 951                                 uint8_t PortPins)
+ 952          {
+ 953   1        BitStatus TempBitstatus;
+ 954   1        switch(GPIOx)
+ 955   1        {
+ 956   2          case GPIO0:
+ 957   2            TempBitstatus = (P0 & PortPins);
+ 958   2                        break;
+ 959   2          case GPIO1:
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 17  
+
+ 960   2            TempBitstatus = (P1 & PortPins);
+ 961   2                        break;
+ 962   2          case GPIO2:
+ 963   2            TempBitstatus = (P2 & PortPins);
+ 964   2                        break;
+ 965   2      #if defined(SC92F854x) || defined(SC92F754x) || defined(SC92F844xB) || defined(SC92F744xB) || defined(SC92
+             -F84Ax_2) || defined(SC92F74Ax_2)\
+ 966   2              || defined(SC92FWxx) || defined(SC92F859x) || defined(SC92F759x) || defined (SC92R511x)
+                  case GPIO3:
+                    TempBitstatus = (P3 & PortPins);
+                                break;
+                  case GPIO4:
+                    TempBitstatus = (P4 & PortPins);
+                                break;
+              #endif
+ 974   2      #if !defined(SC92F730x) && !defined(SC92F725X) && !defined(SC92F735X) && !defined(SC92F8003) && !defined(S
+             -C92F8003B) && !defined(SC92F740x) && !defined(SC92F827X) && !defined(SC92F837X) && !defined(SC92F7003)\
+ 975   2                      && !defined(SC92F730x_2) && !defined(SC92F720x) &&! defined(SC92F7308B)
+ 976   2          case GPIO5:
+ 977   2            TempBitstatus = (P5 & PortPins);
+ 978   2                        break;
+ 979   2      #endif
+ 980   2          default:
+ 981   2            TempBitstatus = RESET;
+ 982   2                        break;
+ 983   2        }
+ 984   1      
+ 985   1        if(TempBitstatus != RESET)
+ 986   1          return SET;
+ 987   1        else
+ 988   1          return RESET;
+ 989   1      }
+ 990          
+ 991          /**
+ 992           * @brief  Toggles the specified GPIO pins.
+ 993            * @param  GPIOx[in]: where x can be to select the GPIO peripheral. 
+ 994           *  SC92F854x,SC92F754x,SC92F844xB,SC92F744xB,SC92F84Ax_2,SC92F74Ax_2,SC92FWxx,SC92F859x,SC92F759x,SC92R51
+             -1x
+ 995           *               Selection range(GPIO0 - GPIO5)   
+ 996           *  SC92F730x,SC92F725X,SC92F735X,SC92F8003,SC92F8003B,SC92F740x,SC92F827X,SC92F837X,SC92F7003,SC92F730x_2
+             -,SC92F720x/
+ 997           *  SC92F7308B
+ 998           *               Selection range(GPIO0 - GPIO2)
+ 999           *  else model  
+1000           *               Selection range(GPIO0 - GPIO2,GPIO5)
+1001           *               - GPIO0: select the GPIO0 peripheral
+1002           *               - GPIO1: select the GPIO1 peripheral
+1003           *               - GPIO2: select the GPIO2 peripheral
+1004           *               - GPIO3: select the GPIO3 peripheral
+1005           *               - GPIO4: select the GPIO4 peripheral
+1006           *               - GPIO5: select the GPIO5 peripheral
+1007           * @param  PortPins[in]: specifies the port bit to be written.
+1008           *                   - GPIO_Pin_0:Pin 0 selected  
+1009           *                   - GPIO_Pin_1:Pin 1 selected  
+1010           *                   - GPIO_Pin_2:Pin 2 selected   
+1011           *                   - GPIO_Pin_3:Pin 3 selected    
+1012           *                   - GPIO_Pin_4:Pin 4 selected    
+1013           *                   - GPIO_Pin_5:Pin 5 selected    
+1014           *                   - GPIO_Pin_6:Pin 6 selected    
+1015           *                   - GPIO_Pin_7:Pin 7 selected   
+1016           *                   - GPIO_PIN_LNIB:Pin Low 4 Bits selected             
+1017           *                   - GPIO_PIN_HNIB:Pin High 4 Bits selected
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 18  
+
+1018           *                   - GPIO_PIN_All:All pins selected 
+1019           * @retval None
+1020           */
+1021          void GPIO_TogglePin(GPIO_TypeDef GPIOx, uint8_t PortPins)
+1022          {
+1023   1        switch(GPIOx)
+1024   1        {
+1025   2          case GPIO0:
+1026   2                      {
+1027   3                               if((PortPins&0x01))
+1028   3                {   
+1029   4                  IO00 = ~IO00;
+1030   4                }
+1031   3                                        if((PortPins&0x02))
+1032   3                      {   
+1033   4                  IO01 = ~IO01;
+1034   4                }     
+1035   3                                        if((PortPins&0x04))
+1036   3                      {   
+1037   4                  IO02 = ~IO02;
+1038   4                }     
+1039   3                                        if((PortPins&0x08))
+1040   3                      {   
+1041   4                  IO03 = ~IO03;
+1042   4                }     
+1043   3                                              if((PortPins&0x10))
+1044   3                      {   
+1045   4                  IO04 = ~IO04;
+1046   4                }     
+1047   3                                        if((PortPins&0x20))
+1048   3                      {   
+1049   4                  IO05 = ~IO05;
+1050   4                }     
+1051   3                                              if((PortPins&0x40))
+1052   3                      {   
+1053   4                  IO06 = ~IO06;
+1054   4                }
+1055   3                                              if((PortPins&0x80))
+1056   3                      {   
+1057   4                  IO07 = ~IO07;
+1058   4                }     
+1059   3                      }
+1060   2            break;
+1061   2          case GPIO1:
+1062   2                      {
+1063   3                               if((PortPins&0x01))
+1064   3                {   
+1065   4                  IO10 = ~IO10;
+1066   4                }
+1067   3                                        if((PortPins&0x02))
+1068   3                      {   
+1069   4                  IO11 = ~IO11;
+1070   4                }     
+1071   3                                        if((PortPins&0x04))
+1072   3                      {   
+1073   4                  IO12 = ~IO12;
+1074   4                }     
+1075   3                                        if((PortPins&0x08))
+1076   3                      {   
+1077   4                  IO13 = ~IO13;
+1078   4                }     
+1079   3                                              if((PortPins&0x10))
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 19  
+
+1080   3                      {   
+1081   4                  IO14 = ~IO14;
+1082   4                }     
+1083   3                                        if((PortPins&0x20))
+1084   3                      {   
+1085   4                  IO15 = ~IO15;
+1086   4                }     
+1087   3                                              if((PortPins&0x40))
+1088   3                      {   
+1089   4                  IO16 = ~IO16;
+1090   4                }
+1091   3                                              if((PortPins&0x80))
+1092   3                      {   
+1093   4                  IO17 = ~IO17;
+1094   4                }     
+1095   3                      }
+1096   2            break;
+1097   2          case GPIO2:
+1098   2                      {
+1099   3                               if((PortPins&0x01))
+1100   3                {   
+1101   4                  IO20 = ~IO20;
+1102   4                }
+1103   3                                        if((PortPins&0x02))
+1104   3                      {   
+1105   4                  IO21 = ~IO21;
+1106   4                }     
+1107   3                                        if((PortPins&0x04))
+1108   3                      {   
+1109   4                  IO22 = ~IO22;
+1110   4                }     
+1111   3                                        if((PortPins&0x08))
+1112   3                      {   
+1113   4                  IO23 = ~IO23;
+1114   4                }     
+1115   3                                              if((PortPins&0x10))
+1116   3                      {   
+1117   4                  IO24 = ~IO24;
+1118   4                }     
+1119   3                                        if((PortPins&0x20))
+1120   3                      {   
+1121   4                  IO25 = ~IO25;
+1122   4                }     
+1123   3                                              if((PortPins&0x40))
+1124   3                      {   
+1125   4                  IO26 = ~IO26;
+1126   4                }
+1127   3                                              if((PortPins&0x80))
+1128   3                      {   
+1129   4                 IO27 = ~IO27;
+1130   4                }     
+1131   3                      }
+1132   2            break;
+1133   2      #if defined(SC92F854x) || defined(SC92F754x) || defined(SC92F844xB) || defined(SC92F744xB) || defined(SC92
+             -F84Ax_2) || defined(SC92F74Ax_2)\
+1134   2              || defined(SC92FWxx) || defined(SC92F859x) || defined(SC92F759x) || defined (SC92R511x)
+                  case GPIO3:
+                              {
+                                       if((PortPins&0x01))
+                        {   
+                          IO30 = ~IO30;
+                        }
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 20  
+
+                                                if((PortPins&0x02))
+                              {   
+                          IO31 = ~IO31;
+                        }     
+                                                if((PortPins&0x04))
+                              {   
+                          IO32 = ~IO32;
+                        }     
+                                                if((PortPins&0x08))
+                              {   
+                          IO33 = ~IO33;
+                        }     
+                                                      if((PortPins&0x10))
+                              {   
+                          IO34 = ~IO34;
+                        }     
+                                                if((PortPins&0x20))
+                              {   
+                          IO35 = ~IO35;
+                        }     
+                                                      if((PortPins&0x40))
+                              {   
+                          IO36 = ~IO36;
+                        }
+                                                      if((PortPins&0x80))
+                              {   
+                          IO37 = ~IO37;
+                        }     
+                              }
+                    break;
+                  case GPIO4:
+                  {
+                                       if((PortPins&0x01))
+                        {   
+                          IO40 = ~IO40;
+                        }
+                                                if((PortPins&0x02))
+                              {   
+                          IO41 = ~IO41;
+                        }     
+                                                if((PortPins&0x04))
+                              {   
+                          IO42 = ~IO42;
+                        }     
+                                                if((PortPins&0x08))
+                              {   
+                          IO43 = ~IO43;
+                        }     
+                                                      if((PortPins&0x10))
+                              {   
+                          IO44 = ~IO44;
+                        }     
+                                                if((PortPins&0x20))
+                              {   
+                          IO45 = ~IO45;
+                        }     
+                                                      if((PortPins&0x40))
+                              {   
+                          IO46 = ~IO46;
+                        }
+                                                      if((PortPins&0x80))
+                              {   
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 21  
+
+                          IO47 = ~IO47;
+                        }     
+                              }
+                    break;
+              #endif
+1208   2      #if !defined(SC92F730x) && !defined(SC92F725X) && !defined(SC92F735X) && !defined(SC92F8003) && !defined(S
+             -C92F8003B) && !defined(SC92F7003) && !defined(SC92F740x)\
+1209   2                      && !defined(SC92F730x_2) && !defined(SC92F720x) && !defined(SC92F827X) && !defined(SC92F837X)&& !defined
+             -(SC92F7308B)
+1210   2          case GPIO5:
+1211   2            {
+1212   3                               if((PortPins&0x01))
+1213   3                {   
+1214   4                  IO50 = ~IO50;
+1215   4                }
+1216   3                                        if((PortPins&0x02))
+1217   3                      {   
+1218   4                  IO51 = ~IO51;
+1219   4                }     
+1220   3                                        if((PortPins&0x04))
+1221   3                      {   
+1222   4                  IO52 = ~IO52;
+1223   4                }     
+1224   3                                        if((PortPins&0x08))
+1225   3                      {   
+1226   4                  IO53 = ~IO53;
+1227   4                }     
+1228   3                                              if((PortPins&0x10))
+1229   3                      {   
+1230   4                  IO54 = ~IO54;
+1231   4                }     
+1232   3                                        if((PortPins&0x20))
+1233   3                      {   
+1234   4                  IO55 = ~IO55;
+1235   4                }     
+1236   3      
+1237   3                      }
+1238   2            break;
+1239   2      #endif
+1240   2          default:
+1241   2            break;
+1242   2        }
+1243   1      }
+1244          
+1245          
+1246          /**
+1247           * @brief  Sets the I/O driver level 
+1248           * @param  GPIOx[in]: where x can be to select the GPIO peripheral. 
+1249           *  SC92F854x,SC92F754x,SC92F844xB,SC92F744xB,SC92F84Ax_2,SC92F74Ax_2,SC92FWxx,SC92F859x,SC92F759x,SC92R51
+             -1x
+1250           *               Selection range(GPIO0 - GPIO5)   
+1251           *  SC92F730x,SC92F725X,SC92F735X,SC92F8003,SC92F8003B,SC92F740x,SC92F827X,SC92F837X,SC92F7003,SC92F730x_2
+             -,SC92F720x/
+1252           *  SC92F7308B
+1253           *               Selection range(GPIO0 - GPIO2)
+1254           *  else model  
+1255           *               Selection range(GPIO0 - GPIO2,GPIO5)
+1256           *               - GPIO0: select the GPIO0 peripheral
+1257           *               - GPIO1: select the GPIO1 peripheral
+1258           *               - GPIO2: select the GPIO2 peripheral
+1259           *               - GPIO3: select the GPIO3 peripheral
+1260           *               - GPIO4: select the GPIO4 peripheral
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 22  
+
+1261           *               - GPIO5: select the GPIO5 peripheral
+1262           * @param  PortPins[in]: The input port pin value.
+1263           *                   - GPIO_Pin_0:Pin 0 selected  
+1264           *                   - GPIO_Pin_1:Pin 1 selected  
+1265           *                   - GPIO_Pin_2:Pin 2 selected   
+1266           *                   - GPIO_Pin_3:Pin 3 selected    
+1267           *                   - GPIO_Pin_4:Pin 4 selected    
+1268           *                   - GPIO_Pin_5:Pin 5 selected    
+1269           *                   - GPIO_Pin_6:Pin 6 selected    
+1270           *                   - GPIO_Pin_7:Pin 7 selected   
+1271           *                   - GPIO_PIN_LNIB:Pin Low 4 Bits selected             
+1272           *                   - GPIO_PIN_HNIB:Pin High 4 Bits selected
+1273           *                   - GPIO_PIN_All:All pins selected 
+1274           * @param  GPIO_DriveLevel[in]: specifies the operating Drive Level for the selected pins.
+1275           *                  - IOH_Grade_0:I/O output Drive: Level 0(Max) 
+1276           *                  - IOH_Grade_1:I/O output Drive: Level 1 
+1277           *                  - IOH_Grade_2:I/O output Drive: Level 2 
+1278           *                  - IOH_Grade_3:I/O output Drive: Level 3    
+1279           * @retval None
+1280           */
+1281          #if !defined(SC92F7003) && !defined(SC92F8003) && !defined(SC92F8003B) && !defined(SC92F740x)&& !defined(S
+             -C92F6x1x) && !defined(SC92F5x1x)&& !defined(SC92R436)&& !defined(SC92R439)&& !defined(SC92R438)\
+1282               && !defined(SC92L840x)
+1283          void GPIO_IOH_Config(GPIO_TypeDef GPIOx, GPIO_Pin_TypeDef PortPins, GPIO_IOH_Grade_TypeDef GPIO_IOH_Grade)
+1284          {
+1285   1      #if defined(SC92F854x) || defined(SC92F754x) || defined(SC92F844xB) || defined(SC92F744xB) || defined(SC92
+             -F84Ax_2) || defined(SC92F74Ax_2)\
+1286   1                      || defined(SC92FWxx) || defined(SC92F859x) || defined(SC92F759x)  || defined (SC92L853x) || defined (SC9
+             -2L753x) || defined (SC92R511x)\
+1287   1                || defined(SC92F646x) || defined(SC92F546x) || defined(SC92F542x)
+                switch(GPIOx)
+                {
+                  case GPIO0:
+                    if(PortPins == GPIO_PIN_LNIB)
+                    {
+                      IOHCON0 &= 0xFC;
+                      IOHCON0 |= GPIO_IOH_Grade;
+                    }
+                    else if(PortPins == GPIO_PIN_HNIB)
+                    {
+                      IOHCON0 &= 0xF3;
+                      IOHCON0 |= GPIO_IOH_Grade << 2;
+                    }
+                    break;
+                  case GPIO1:
+                    if(PortPins == GPIO_PIN_LNIB)
+                    {
+                      IOHCON0 &= 0xCF;
+                      IOHCON0 |= GPIO_IOH_Grade << 4;
+                    }
+                    else if(PortPins == GPIO_PIN_HNIB)
+                    {
+                      IOHCON0 &= 0x3F;
+                      IOHCON0 |= GPIO_IOH_Grade << 6;
+                    }
+                    break;
+                  case GPIO2:
+                    if(PortPins == GPIO_PIN_LNIB)
+                    {
+                      IOHCON1 &= 0xFC;
+                      IOHCON1 |= GPIO_IOH_Grade;
+                    }
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 23  
+
+                    else if(PortPins == GPIO_PIN_HNIB)
+                    {
+                      IOHCON1 &= 0xF3;
+                      IOHCON1 |= GPIO_IOH_Grade << 2;
+                    }
+                    break;
+              #if defined (SC92L853x) || defined (SC92L753x) || defined(SC92F646x) || defined(SC92F546x) || defined(SC92
+             -F542x)
+                  case GPIO5:
+                    if(PortPins == GPIO_PIN_LNIB)
+                    {
+                      IOHCON1 &= 0xCF;
+                      IOHCON1 |= GPIO_IOH_Grade << 4;
+                    }
+                    else if(PortPins == GPIO_PIN_HNIB)
+                    {
+                      IOHCON1 &= 0x3f;
+                      IOHCON1 |= GPIO_IOH_Grade << 6;
+                    }
+                    break;
+              #else
+                  case GPIO3:
+                    if(PortPins == GPIO_PIN_LNIB)
+                    {
+                      IOHCON1 &= 0xCF;
+                      IOHCON1 |= GPIO_IOH_Grade << 4;
+                    }
+                    break;
+              #endif
+                  default:
+                    break;
+                }
+              #else
+1352   1        switch(GPIOx)
+1353   1        {
+1354   2          case GPIO0:
+1355   2            if(PortPins == GPIO_PIN_LNIB)
+1356   2            {
+1357   3              IOHCON &= 0xFC;
+1358   3              IOHCON |= GPIO_IOH_Grade;
+1359   3            }
+1360   2            else if(PortPins == GPIO_PIN_HNIB)
+1361   2            {
+1362   3              IOHCON &= 0xF3;
+1363   3              IOHCON |= GPIO_IOH_Grade << 2;
+1364   3            }
+1365   2            break;
+1366   2          case GPIO2:
+1367   2            if(PortPins == GPIO_PIN_LNIB)
+1368   2            {
+1369   3              IOHCON &= 0xCF;
+1370   3              IOHCON |= GPIO_IOH_Grade << 4;
+1371   3            }
+1372   2            else if(PortPins == GPIO_PIN_HNIB)
+1373   2            {
+1374   3              IOHCON &= 0x3F;
+1375   3              IOHCON |= GPIO_IOH_Grade << 6;
+1376   3            }
+1377   2            break;
+1378   2          default:
+1379   2            break;
+1380   2        }
+C51 COMPILER V9.57.0.0   SC92F_GPIO                                                        11/13/2024 15:03:32 PAGE 24  
+
+1381   1      #endif
+1382   1      }
+1383          #endif
+1384          /**
+1385           * @}
+1386           */
+1387          /* End of GPIO_Group2.  */
+1388          
+1389          
+1390          /**
+1391           * @}
+1392           */
+1393          
+1394          /**
+1395           * @}
+1396           */
+1397          
+1398          /**
+1399           * @}
+1400           */
+1401          
+1402          /******************* (C) COPYRIGHT 2024 SinOne Microelectronics *****END OF FILE****/
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    937    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

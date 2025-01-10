@@ -1,0 +1,1 @@
+"c\Timer_Init.c" LARGE OMF2 OPTIMIZE (0,SPEED) BROWSE INCDIR(.\H;.\User;.\TKDriver\C) DEBUG PRINT(.\Listings\Timer_Init.lst) OBJECT(.\Objects\Timer_Init.obj)
